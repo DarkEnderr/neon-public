@@ -1,6 +1,5 @@
 const rps = require('discord-rock-paper-scissor');
 const game = new rps({
-    readyMessage: "Nerds choose your moves in the DMs",
     endTitle: "{winner} won the dang game",
     endDescription: "{winner} is the winner\n{looser} is the looser",
 });

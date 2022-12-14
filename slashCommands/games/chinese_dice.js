@@ -1,12 +1,29 @@
 const { MessageActionRow, MessageButton, MessageEmbed } = require('discord.js')
+const db = require('../../database')
+const { Users } = require('../../schemas/schema')
 
 module.exports = {
-    name: 'chinese_dice',
+    name: 'chinese_dice2',
     description: 'chinese dice game',
     type: 'CHAT_INPUT',
     UserPerms: ['SEND_MESSAGE'],
     BotPerms: ['SEND_MESSAGE'],
+    options: [
+        {
+            name: 'amount',
+            description: 'Your money',
+            type: 'NUMBER',
+            required: false
+        }
+    ],
     run: async (client, interaction) => {
+        const amount = interaction.options.getNumber('amount') || 0;
+        const userData = await Users.findOne({ userid: interaction.user.id }) || new Users({ userid: interaction.user.id })
+
+        if(amount > userData.cash) {
+            //return interaction.reply('You dont have money to bet')
+            amount = userData.cash;
+        }
         const dices = [];
         const dicefaces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
         var sum = 0;
@@ -55,12 +72,16 @@ module.exports = {
                     (interaction.customId === 'tai' && sum >= 11)
                     || (interaction.customId == 'xiu' && sum < 11)
                 ) {
+                    userData.cash += amount
+                    userData.save()
                      var endEmbed = new MessageEmbed()
                     .setColor('YELLOW')
                     .setTitle('You Won!')
                     .setDescription(`\`${dices[0]} ${dices[1]} ${dices[2]}\` Score:\`${sum}\` ` + 'Weo, it cool!');
                 }
                 else {
+                    userData.cash -= amount
+                    userData.save()
                      var endEmbed = new MessageEmbed()
                     .setColor('RED')
                     .setTitle('You Lost!')

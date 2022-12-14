@@ -1,7 +1,7 @@
 const { MessageAttachment, MessageCollector } = require('discord.js');
 const createHangman = require("hangmancreate");
 module.exports = {
-    name: "hangman",
+    name: "hangman2",
     description: "Play the hangman game",
     UserPerms: ['SEND_MESSAGES'],
     BotPerms: ['SEND_MESSAGES'],
@@ -11,16 +11,17 @@ module.exports = {
             name: 'letter',
             description: 'Nội dung muốn bot nói',
             type: 'STRING',
-            required: true,
+            required: false,
         }
     ],
     run: async (client, interaction) => {
         const words = interaction.options.getString('letter');
-        await interaction.deferReply();
+        const user = interaction.user;
+        await interaction.deferReply({ content: 'Loading...', ephemeral: false });
 
         let wrongs = 0, at = new MessageAttachment(await createHangman(wrongs), "game.png"), word = words || 'discord', used = [];
 
-        await interaction.editReply({
+        await interaction.followUp({
             files: [at],
             embeds: [{
                 title: "Hangman Game!",
@@ -29,7 +30,8 @@ module.exports = {
                 },
                 color: "BLUE",
                 description: `Type a character to guess the word\n\n\`\`\`${word.split("").map(v => used.includes(v) ? v.toUpperCase() : "_").join(" ")}\`\`\``
-            }]
+            }],
+            ephemeral: false
         });
 
         const col = new MessageCollector(interaction.channel, {
@@ -60,7 +62,8 @@ module.exports = {
                     },
                     color: wrongs === 6 ? "#ff0000" : done ? "GREEN" : "RANDOM",
                     description
-                }]
+                }],
+                ephemeral: false
             });
 
             if (wrongs === 6 || done) col.stop();
@@ -73,7 +76,8 @@ module.exports = {
                     embeds: [{
                         title: "⛔ Game Ended",
                         description: "You took too much time to respond"
-                    }]
+                    }],
+                    ephemeral: false
                 });
             }
         })
